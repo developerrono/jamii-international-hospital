@@ -1,19 +1,20 @@
-// src/integrations/supabase/client.ts
+// Replace @supabase/ssr with the standard client
+import { createClient } from '@supabase/supabase-js';
 
-import { createClient } from "@supabase/supabase-js";
-
-// !!! --- CHANGE 1: Use VITE_ prefix --- !!!
+// 1. Reference the variables using Vite's 'import.meta.env' syntax
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const createSupabaseClient = () =>
-  createClient(
-    supabaseUrl, // The '!' is removed because import.meta.env.VITE_... is typed correctly
-    supabaseKey
-  );
+// 2. Add validation to ensure they were loaded
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Supabase URL or Key not found in environment variables (check your .env file and VITE_ prefix)');
+}
 
-// !!! --- CHANGE 2: Export the client directly for easy use --- !!!
-// If you intend to use this client across your app, you should export the instance
-// or a simple wrapper that calls the create function once.
-// For example:
-// export const supabase = createSupabaseClient();
+// 3. Create and export the client
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseAnonKey
+);
+
+// This ensures you are using a named export, which fixes your previous error:
+// import { supabase } from '...';
