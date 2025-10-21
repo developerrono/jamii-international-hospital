@@ -3,8 +3,8 @@ import { User } from "@supabase/supabase-js";
 import { Calendar, FileText, CreditCard, Activity, Beaker } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import BookAppointment from "@/components/appointments/BookAppointment";
-import PayBills from "@/components/billing/PayBills";
+import BookAppointment from "@/components/appointments/BookAppointments";
+import PayBills from "@/components/billing/Paybills";
 import ViewMedicalRecords from "@/components/medical/ViewMedicalRecords";
 import { useNavigate } from "react-router-dom";
 
