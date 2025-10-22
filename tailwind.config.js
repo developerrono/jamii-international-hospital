@@ -1,26 +1,81 @@
 // tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // 🟢 FIX: The 'content' array now correctly specifies files for scanning.
   content: [
-    // Include paths to all your components/files here (e.g., "./src/**/*.{js,ts,jsx,tsx}")
+    "./index.html",
+    // Scans all .js, .ts, .jsx, and .tsx files within the 'src' directory
+    "./src/**/*.{js,ts,jsx,tsx}", 
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
+      // 🟢 ADDED: Complete Shadcn UI color variables mapping to CSS HSL
       colors: {
-        // 👇 ADD THIS SECTION to map the 'border' class to the '--border' CSS variable.
-        border: "hsl(var(--border))", 
-        // 👇 ADD THESE LINES for other colors you defined in your :root block
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
-        // Add all other custom colors (card, popover, etc.) following this pattern
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+      },
+      // ------------------------------------------------------------------
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
+  // Note: Add any necessary plugins here (e.g., require('tailwindcss-animate'))
   plugins: [
-    // ... any plugins you are using (e.g., require('tailwindcss-animate'))
-  ],
+    // Add plugins if necessary, e.g., require('tailwindcss-animate')
+  ], 
 };

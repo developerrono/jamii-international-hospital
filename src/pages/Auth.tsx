@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  (typeof window !== "undefined" && (import.meta as any).env?.VITE_SUPABASE_URL as string) ??
-    (process.env.REACT_APP_SUPABASE_URL as string) ??
-    "",
-  (typeof window !== "undefined" && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY as string) ??
-    (process.env.REACT_APP_SUPABASE_ANON_KEY as string) ??
-    ""
-);
+import * as supabaseClient from "@/intergrations/supabase/client";
+const supabase = (supabaseClient as any).default ?? (supabaseClient as any).supabase;
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,60 +30,98 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: loginData.email,
-        password: loginData.password,
-      });
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: loginData.email,
+            password: loginData.password,
+        });
 
-      if (error) throw error;
+        if (signInError) throw signInError;
 
-      toast.success("Logged in successfully!");
-      navigate("/dashboard");
+        // --- NEW RBAC CHECK ---
+        const { data: { user } } = await supabase.auth.getUser();
+
+        // 1. Fetch profile and role after successful sign-in
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role') // Ensure your Supabase table is named 'profiles' and has a 'role' column
+            .eq('id', user?.id)
+            .single();
+
+        if (profileError || !profile || !profile.role || profile.role === 'pending') {
+            // 2. If unauthorized, sign the user out immediately and throw an error
+            await supabase.auth.signOut(); 
+            throw new Error("Access denied. Your account is unauthorized or is pending admin approval.");
+        }
+        // --- END RBAC CHECK ---
+
+        toast.success(`Welcome back, ${profile.role}!`);
+        navigate("/dashboard");
     } catch (error: any) {
-      toast.error(error.message || "Failed to log in");
+        toast.error(error.message || "Failed to log in");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
-  const handleSignup = async (e: React.FormEvent) => {
+ const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (signupData.password !== signupData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
+        toast.error("Passwords do not match");
+        return;
     }
 
     if (signupData.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
+        toast.error("Password must be at least 6 characters");
+        return;
     }
 
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email: signupData.email,
-        password: signupData.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            full_name: signupData.fullName,
-          },
-        },
-      });
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: signupData.email,
+            password: signupData.password,
+            options: {
+                emailRedirectTo: `${window.location.origin}/dashboard`,
+                data: {
+                    full_name: signupData.fullName,
+                },
+            },
+        });
 
-      if (error) throw error;
+        if (signUpError) throw signUpError;
 
-      toast.success("Account created successfully! You can now log in.");
-      setSignupData({ fullName: "", email: "", password: "", confirmPassword: "" });
+        // --- NEW PROFILE CREATION ---
+        const newUserId = signUpData.user?.id;
+
+        if (newUserId) {
+            const { error: profileError } = await supabase
+                .from('profiles') // Ensure your table is named 'profiles'
+                .insert([
+                    { 
+                        id: newUserId, 
+                        full_name: signupData.fullName,
+                        role: 'pending', // Set a default role that requires admin activation
+                        email: signupData.email 
+                    } 
+                ]);
+
+            if (profileError) {
+                console.error("Failed to create profile record:", profileError);
+                // The account still exists but profile data is missing - log for admin to fix
+            }
+        }
+        // --- END PROFILE CREATION ---
+
+        toast.success("Account created successfully! Please check your email to confirm.");
+        setSignupData({ fullName: "", email: "", password: "", confirmPassword: "" });
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign up");
+        toast.error(error.message || "Failed to sign up");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
-
+};
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
       <div className="w-full max-w-md">
