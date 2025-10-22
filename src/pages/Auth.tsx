@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import * as supabaseClient from "@/intergrations/supabase/client";
-const supabase = (supabaseClient as any).default ?? (supabaseClient as any).supabase;
+import { supabase } from "@/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,65 +62,44 @@ const Auth = () => {
     }
 };
 
- const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (signupData.password !== signupData.confirmPassword) {
-        toast.error("Passwords do not match");
-        return;
+      toast.error("Passwords do not match");
+      return;
     }
 
     if (signupData.password.length < 6) {
-        toast.error("Password must be at least 6 characters");
-        return;
+      toast.error("Password must be at least 6 characters");
+      return;
     }
 
     setLoading(true);
 
     try {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: signupData.email,
-            password: signupData.password,
-            options: {
-                emailRedirectTo: `${window.location.origin}/dashboard`,
-                data: {
-                    full_name: signupData.fullName,
-                },
-            },
-        });
+      const { error } = await supabase.auth.signUp({
+        email: signupData.email,
+        password: signupData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            full_name: signupData.fullName,
+          },
+        },
+      });
 
-        if (signUpError) throw signUpError;
+      if (error) throw error;
 
-        // --- NEW PROFILE CREATION ---
-        const newUserId = signUpData.user?.id;
-
-        if (newUserId) {
-            const { error: profileError } = await supabase
-                .from('profiles') // Ensure your table is named 'profiles'
-                .insert([
-                    { 
-                        id: newUserId, 
-                        full_name: signupData.fullName,
-                        role: 'pending', // Set a default role that requires admin activation
-                        email: signupData.email 
-                    } 
-                ]);
-
-            if (profileError) {
-                console.error("Failed to create profile record:", profileError);
-                // The account still exists but profile data is missing - log for admin to fix
-            }
-        }
-        // --- END PROFILE CREATION ---
-
-        toast.success("Account created successfully! Please check your email to confirm.");
-        setSignupData({ fullName: "", email: "", password: "", confirmPassword: "" });
+      toast.success("Account created successfully! You can now log in.");
+      setSignupData({ fullName: "", email: "", password: "", confirmPassword: "" });
     } catch (error: any) {
-        toast.error(error.message || "Failed to sign up");
+      toast.error(error.message || "Failed to sign up");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
       <div className="w-full max-w-md">

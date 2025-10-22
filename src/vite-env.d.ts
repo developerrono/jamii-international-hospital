@@ -1,2 +1,4 @@
-VITE_SUPABASE_URL="https://scemivmaleextlvmcywu.supabase.co"
-VITE_SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjZW1pdm1hbGVleHRsdm1jeXd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwNjYwNDYsImV4cCI6MjA3NjY0MjA0Nn0.yNAPil2zvFFeGPE4U5GVdNAIm9R5wa3rdj9VCG5bbEI"
+/// <reference types="vite/client" />
+
+declare const NEXT_PUBLIC_SUPABASE_URL: string;
+declare const NEXT_PUBLIC_SUPABASE_ANON_KEY: string;

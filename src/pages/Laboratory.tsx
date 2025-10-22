@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import * as supabaseClient from "@/intergrations/supabase/client";
-const supabase = (supabaseClient as any).default ?? (supabaseClient as any).supabase;
+import { supabase } from "@/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import * as supabaseClient from "@/intergrations/supabase/client";
-const supabase = (supabaseClient as any).default ?? (supabaseClient as any).supabase;
+import { supabase } from "@/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";

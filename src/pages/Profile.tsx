@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User } from "@supabase/supabase-js";
-import * as supabaseClient from "@/intergrations/supabase/client";
-const supabase = (supabaseClient as any).default ?? (supabaseClient as any).supabase;
+import { supabase } from "@/supabase/client";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
